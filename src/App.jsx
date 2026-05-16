@@ -318,9 +318,17 @@ export default function App() {
         {/* Header */}
         <header className="bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 bg-slate-50 py-2 px-4 rounded-2xl border border-slate-200">
-              <LogoBadge size="sm" />
+            {/* 源信 Logo */}
+            <div className="flex items-center gap-3 bg-slate-50 py-2.5 px-4 rounded-2xl border border-slate-200">
+              <div className="bg-blue-800 p-2 rounded-xl shadow-sm flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-lg font-black text-blue-900 tracking-widest">源信</span>
+                <span className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">記帳士事務所</span>
+              </div>
             </div>
+            {/* 系統標題 */}
             <div>
               <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-800 tracking-tight">稅務決策試算系統</h1>
               <p className="text-slate-500 text-sm mt-1 flex items-center gap-1.5 font-medium">
