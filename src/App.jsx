@@ -93,14 +93,60 @@ function processJSONData(rawJson) {
 }
 
 // ─────────────────────────────────────────────
-// Logo
+// 品牌 Logo 元件（icon + 源信 + 記帳士事務所）
 // ─────────────────────────────────────────────
-function LogoBadge({ size = 'md' }) {
-  const pad = size === 'sm' ? 'p-2 rounded-xl' : 'p-3 rounded-2xl';
-  const icon = size === 'sm' ? 'w-5 h-5' : 'w-8 h-8';
+function BrandLogo({ compact = false }) {
   return (
-    <div className={`bg-blue-800 ${pad} shadow-md flex items-center justify-center`}>
-      <Building2 className={`${icon} text-white`} />
+    <div
+      style={{ display: 'flex', alignItems: 'center', gap: compact ? 10 : 12 }}
+    >
+      {/* 深藍底 icon 方塊 */}
+      <div
+        style={{
+          backgroundColor: '#1e3a8a',
+          borderRadius: compact ? 10 : 14,
+          padding: compact ? '7px' : '10px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          boxShadow: '0 2px 6px rgba(30,58,138,0.25)',
+        }}
+      >
+        <Building2
+          style={{
+            width: compact ? 18 : 24,
+            height: compact ? 18 : 24,
+            color: '#ffffff',
+          }}
+        />
+      </div>
+      {/* 文字區 */}
+      <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+        <span
+          style={{
+            fontSize: compact ? 18 : 22,
+            fontWeight: 900,
+            color: '#1e3a8a',
+            letterSpacing: '0.12em',
+            lineHeight: 1.1,
+          }}
+        >
+          源信
+        </span>
+        <span
+          style={{
+            fontSize: compact ? 9 : 10,
+            fontWeight: 700,
+            color: '#94a3b8',
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            marginTop: 3,
+          }}
+        >
+          記帳士事務所
+        </span>
+      </div>
     </div>
   );
 }
@@ -112,18 +158,18 @@ export default function App() {
   const [industryData, setIndustryData] = useState([]);
   const [loadState, setLoadState]       = useState('loading'); // 'loading' | 'ready' | 'error'
 
-  const [searchTerm, setSearchTerm]           = useState('');
+  const [searchTerm, setSearchTerm]             = useState('');
   const [selectedIndustry, setSelectedIndustry] = useState(null);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions]   = useState(false);
   const searchRef = useRef(null);
 
-  const [revenueInput, setRevenueInput]         = useState('10000000');
-  const [otherIncomeInput, setOtherIncomeInput] = useState('0');
+  const [revenueInput, setRevenueInput]           = useState('10000000');
+  const [otherIncomeInput, setOtherIncomeInput]   = useState('0');
   const [auditedProfitInput, setAuditedProfitInput] = useState('800000');
-  const [businessType, setBusinessType]         = useState('company');
-  const [operatingMonths, setOperatingMonths]   = useState(12);
-  const [compareMethod, setCompareMethod]       = useState('expand');
-  const [isExporting, setIsExporting]           = useState(false);
+  const [businessType, setBusinessType]           = useState('company');
+  const [operatingMonths, setOperatingMonths]     = useState(12);
+  const [compareMethod, setCompareMethod]         = useState('expand');
+  const [isExporting, setIsExporting]             = useState(false);
 
   // 點擊外部關閉下拉
   useEffect(() => {
@@ -135,7 +181,7 @@ export default function App() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // ── 啟動時自動載入 /latest.json ──
+  // 啟動時自動載入 /latest.json
   useEffect(() => {
     const load = async () => {
       setLoadState('loading');
@@ -154,16 +200,16 @@ export default function App() {
     load();
   }, []);
 
-  // ── 數值解析 ──
-  const revenueNum      = parseFloat(revenueInput.replace(/,/g, '')) || 0;
-  const otherIncomeNum  = parseFloat(otherIncomeInput) || 0;
+  // 數值解析
+  const revenueNum       = parseFloat(revenueInput.replace(/,/g, '')) || 0;
+  const otherIncomeNum   = parseFloat(otherIncomeInput) || 0;
   const auditedProfitNum = parseFloat(auditedProfitInput.replace(/,/g, '')) || 0;
-  const auditedMargin   = revenueNum > 0 ? ((auditedProfitNum / revenueNum) * 100).toFixed(2) : '0.00';
+  const auditedMargin    = revenueNum > 0 ? ((auditedProfitNum / revenueNum) * 100).toFixed(2) : '0.00';
 
   const formatCurrency = (n) =>
     new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', minimumFractionDigits: 0 }).format(n);
 
-  // ── 稅額計算（含不滿一年換算）──
+  // 稅額計算（含不滿一年換算）
   const calcTax = (income, months) => {
     if (income <= 0) return 0;
     const ann = (income * 12) / months;
@@ -202,7 +248,7 @@ export default function App() {
   const resultC = selectedIndustry ? calcStandard(selectedIndustry.net,    revenueNum, otherIncomeNum, 'net',    operatingMonths, businessType) : null;
 
   const compareData = useMemo(() => {
-    const map = { expand: resultA, income: resultB, net: resultC };
+    const map     = { expand: resultA, income: resultB, net: resultC };
     const nameMap = { expand: '擴大書審', income: '所得額標準', net: '同業利潤標準' };
     const standardResult = map[compareMethod];
     if (!standardResult) return null;
@@ -224,7 +270,7 @@ export default function App() {
     return { standardResult, standardName, diff, absDiff, recommendation, isAuditedBetter, netStandardDiff, savingsVsAudit };
   }, [compareMethod, resultA, resultB, resultC, resultAudited, businessType]);
 
-  // ── 搜尋過濾 ──
+  // 搜尋過濾
   const filteredIndustries = useMemo(() => {
     if (!searchTerm.trim() || !industryData.length) return [];
     const kw = searchTerm.trim().replace(/傢俱/g, '家具').replace(/台/g, '臺');
@@ -244,24 +290,39 @@ export default function App() {
     else if (ind.net    && ind.net    !== '－') setCompareMethod('net');
   };
 
-  // ── 截圖匯出 ──
+  // 截圖匯出
   const handleExportImage = useCallback(async () => {
     setIsExporting(true);
     try {
       const el = document.getElementById('report-export-container');
       const hd = document.getElementById('report-header');
-      if (hd) hd.classList.remove('hidden');
+      if (hd) {
+        hd.style.display = 'block';
+        hd.classList.remove('hidden');
+      }
       await document.fonts.ready;
-      await new Promise((r) => setTimeout(r, 120));
+      await new Promise((r) => setTimeout(r, 150));
       const canvas = await html2canvas(el, {
-        scale: 2, backgroundColor: '#f8fafc', useCORS: true, logging: false,
-        onclone: (doc) => { const h = doc.getElementById('report-header'); if (h) h.style.display = 'block'; },
+        scale: 2,
+        backgroundColor: '#f8fafc',
+        useCORS: true,
+        logging: false,
+        onclone: (doc) => {
+          const h = doc.getElementById('report-header');
+          if (h) {
+            h.style.display = 'block';
+            h.classList.remove('hidden');
+          }
+        },
       });
       const a = document.createElement('a');
       a.download = `稅務試算報告_${selectedIndustry?.name || '未命名'}.png`;
       a.href = canvas.toDataURL('image/png');
       a.click();
-      if (hd) hd.classList.add('hidden');
+      if (hd) {
+        hd.style.display = 'none';
+        hd.classList.add('hidden');
+      }
     } catch (err) {
       console.error(err);
       alert('產出圖檔時發生錯誤，請重試！');
@@ -271,13 +332,15 @@ export default function App() {
   }, [selectedIndustry]);
 
   // ══════════════════════════════════════════
-  // 畫面一：載入中
+  // 畫面：載入中
   // ══════════════════════════════════════════
   if (loadState === 'loading') {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="max-w-sm w-full bg-white p-10 rounded-[2rem] shadow-xl border border-slate-100 text-center space-y-6">
-          <LogoBadge />
+          <div className="flex justify-center">
+            <BrandLogo />
+          </div>
           <Loader2 className="w-10 h-10 text-blue-500 animate-spin mx-auto" />
           <p className="text-lg font-bold text-slate-700">正在載入稅率資料庫...</p>
         </div>
@@ -286,7 +349,7 @@ export default function App() {
   }
 
   // ══════════════════════════════════════════
-  // 畫面一ｂ：載入失敗
+  // 畫面：載入失敗
   // ══════════════════════════════════════════
   if (loadState === 'error') {
     return (
@@ -299,8 +362,10 @@ export default function App() {
             <p className="text-xl font-extrabold text-red-800 mb-2">資料庫載入失敗</p>
             <p className="text-slate-500 text-sm">請稍後再試</p>
           </div>
-          <button onClick={() => window.location.reload()}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors">
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors"
+          >
             <RefreshCw className="w-4 h-4" /> 重新載入
           </button>
         </div>
@@ -309,46 +374,58 @@ export default function App() {
   }
 
   // ══════════════════════════════════════════
-  // 畫面二：主試算介面
+  // 畫面：主試算介面
   // ══════════════════════════════════════════
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6 lg:p-8 font-sans text-slate-800">
       <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8">
 
-        {/* Header */}
-        <header className="bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {/* 源信 Logo */}
-            <div className="flex items-center gap-3 bg-slate-50 py-2.5 px-4 rounded-2xl border border-slate-200">
-              <div className="bg-blue-800 p-2 rounded-xl shadow-sm flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-white" />
+        {/* ── 主 Header ── */}
+        <header className="bg-white rounded-[2rem] shadow-sm border border-slate-100 px-6 py-5 lg:px-8 lg:py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+            {/* 左側：Logo + 系統標題 */}
+            <div className="flex items-center gap-5">
+              {/* 品牌 Logo pill */}
+              <div className="flex-shrink-0 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                <BrandLogo compact={false} />
               </div>
-              <div className="flex flex-col leading-tight">
-                <span className="text-lg font-black text-blue-900 tracking-widest">源信</span>
-                <span className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">記帳士事務所</span>
+
+              {/* 分隔線 */}
+              <div className="hidden md:block w-px h-10 bg-slate-200" />
+
+              {/* 系統標題文字 */}
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-800 tracking-tight leading-tight">
+                  稅務決策試算系統
+                </h1>
+                <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-500">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  查帳 vs 標準申報分析｜資料庫共
+                  <strong className="text-emerald-600">{industryData.length}</strong> 筆
+                </p>
               </div>
             </div>
-            {/* 系統標題 */}
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-800 tracking-tight">稅務決策試算系統</h1>
-              <p className="text-slate-500 text-sm mt-1 flex items-center gap-1.5 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                查帳 vs 標準申報分析｜資料庫共
-                <strong className="text-emerald-600">{industryData.length}</strong> 筆
-              </p>
+
+            {/* 右側：年度標籤 */}
+            <div className="flex-shrink-0 hidden md:block">
+              <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-full">
+                114 年度 同業利潤標準
+              </span>
             </div>
           </div>
-          <p className="text-xs text-slate-400 font-medium hidden md:block">114 年度 同業利潤標準</p>
         </header>
 
-        {/* 輸入區塊 */}
+        {/* ── 輸入區塊 ── */}
         <div className="bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm border border-slate-100">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
             {/* 1. 行業搜尋 */}
             <div className="flex flex-col gap-3 h-full">
               <h2 className="text-lg font-bold flex items-center text-slate-800">
-                <span className="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2.5"><Search className="w-4 h-4" /></span>
+                <span className="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2.5">
+                  <Search className="w-4 h-4" />
+                </span>
                 1. 搜尋行業別
               </h2>
               <div className="relative" ref={searchRef}>
@@ -364,8 +441,11 @@ export default function App() {
                 {showSuggestions && filteredIndustries.length > 0 && (
                   <ul className="absolute z-30 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl max-h-60 overflow-auto py-2">
                     {filteredIndustries.map((ind) => (
-                      <li key={ind.code} onClick={() => handleSelectIndustry(ind)}
-                        className="px-5 py-3 hover:bg-blue-50 cursor-pointer flex flex-col border-b border-slate-50 last:border-0 transition-colors">
+                      <li
+                        key={ind.code}
+                        onClick={() => handleSelectIndustry(ind)}
+                        className="px-5 py-3 hover:bg-blue-50 cursor-pointer flex flex-col border-b border-slate-50 last:border-0 transition-colors"
+                      >
                         <span className="font-bold text-slate-800">{ind.name}</span>
                         <span className="text-xs text-blue-600 font-mono mt-0.5">{ind.code}</span>
                       </li>
@@ -391,8 +471,12 @@ export default function App() {
                     <label className="block text-sm font-medium text-slate-500 mb-2">組織型態</label>
                     <div className="flex bg-slate-100 p-1 rounded-xl h-[46px]">
                       {[['company', '公司'], ['firm', '行號']].map(([t, label]) => (
-                        <button key={t} type="button" onClick={() => setBusinessType(t)}
-                          className={`flex-1 text-sm font-bold rounded-lg transition-all ${businessType === t ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setBusinessType(t)}
+                          className={`flex-1 text-sm font-bold rounded-lg transition-all ${businessType === t ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
                           {label}
                         </button>
                       ))}
@@ -401,8 +485,11 @@ export default function App() {
                   <div>
                     <label className="block text-sm font-medium text-slate-500 mb-2">本年營業期間</label>
                     <div className="relative h-[46px]">
-                      <select value={operatingMonths} onChange={(e) => setOperatingMonths(Number(e.target.value))}
-                        className="w-full h-full px-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none font-bold text-slate-700 appearance-none text-sm">
+                      <select
+                        value={operatingMonths}
+                        onChange={(e) => setOperatingMonths(Number(e.target.value))}
+                        className="w-full h-full px-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none font-bold text-slate-700 appearance-none text-sm"
+                      >
                         <option value={12}>12個月(全年)</option>
                         {Array.from({ length: 11 }, (_, i) => 11 - i).map((m) => (
                           <option key={m} value={m}>{m} 個月(比例換算)</option>
@@ -463,7 +550,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* 結果區塊 */}
+        {/* ── 結果區塊 ── */}
         {!selectedIndustry ? (
           <div className="bg-white p-16 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-slate-400 min-h-[300px]">
             <div className="bg-slate-50 p-6 rounded-full mb-5">
@@ -475,64 +562,71 @@ export default function App() {
         ) : (
           <div className="space-y-8" id="report-export-container">
 
-            {/* 截圖按鈕 */}
+            {/* 截圖按鈕（截圖時不顯示） */}
             <div className="flex justify-end" data-html2canvas-ignore>
-              <button onClick={handleExportImage} disabled={isExporting}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl shadow flex items-center gap-2 transition-colors disabled:opacity-70">
+              <button
+                onClick={handleExportImage}
+                disabled={isExporting}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl shadow flex items-center gap-2 transition-colors disabled:opacity-70"
+              >
                 {isExporting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
                 {isExporting ? '產出圖片中...' : '📸 匯出報告圖檔'}
               </button>
             </div>
 
-            {/* 截圖專用 Header */}
-           <div className="flex items-center gap-4 mb-6 border-b pb-4">
-  
-  {/* Logo */}
-  <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3">
-    
-    <div className="w-14 h-14 rounded-2xl bg-blue-700 flex items-center justify-center shadow-sm">
-      <Building2 className="w-7 h-7 text-white" />
-    </div>
+            {/* ── 截圖專用 Header（平時 hidden，截圖時 display:block）── */}
+            <div
+              id="report-header"
+              className="hidden bg-white rounded-2xl border border-slate-200 overflow-hidden"
+            >
+              {/* 頂部深藍色條 */}
+              <div style={{ backgroundColor: '#1e3a8a', height: 6, width: '100%' }} />
 
-    <div className="leading-tight">
-      <div className="text-3xl font-black tracking-wide text-blue-900">
-        源信
-      </div>
-
-      <div className="text-sm font-bold tracking-[0.2em] text-slate-500">
-        記帳士事務所
-      </div>
-    </div>
-  </div>
-
-  {/* 標題 */}
-  <div className="flex flex-col justify-center">
-    
-    <div className="text-2xl font-black text-slate-700">
-      稅務決策試算報告
-    </div>
-
-    <div className="text-sm text-slate-400 mt-1">
-      AI 稅務試算工具
-    </div>
-
-  </div>
-</div>
-              <div className="pb-3 border-b border-slate-100 flex flex-wrap gap-6">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800">行業：{selectedIndustry.name} ({selectedIndustry.code})</h2>
-                  <p className="text-sm text-slate-500 mt-1">營業期間：{operatingMonths} 個月</p>
-                </div>
-                {[
-                  { label: '組織型態', value: businessType === 'company' ? '公司' : '行號', color: 'text-indigo-700', border: 'border-indigo-200' },
-                  { label: '本年度營業額', value: formatCurrency(revenueNum), color: 'text-blue-700', border: 'border-blue-200' },
-                  { label: '其他收支', value: formatCurrency(otherIncomeNum), color: 'text-teal-700', border: 'border-teal-200' },
-                ].map(({ label, value, color, border }) => (
-                  <div key={label} className={`border-l-4 ${border} pl-4`}>
-                    <p className="text-sm font-bold text-slate-500 mb-1">{label}</p>
-                    <p className={`text-2xl font-black ${color}`}>{value}</p>
+              <div style={{ padding: '20px 24px 16px' }}>
+                {/* Logo 列 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <BrandLogo compact={false} />
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1e3a8a' }}>稅務決策試算報告</div>
+                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>AI 稅務試算工具</div>
                   </div>
-                ))}
+                </div>
+
+                {/* 分隔線 */}
+                <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: 14 }}>
+                  {/* 行業 & 期間 */}
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: '#1e293b' }}>
+                      {selectedIndustry.name}
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#64748b', marginLeft: 8 }}>
+                        ({selectedIndustry.code})
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 3 }}>
+                      營業期間：{operatingMonths} 個月｜組織型態：{businessType === 'company' ? '公司' : '行號'}
+                    </div>
+                  </div>
+
+                  {/* 數字欄 */}
+                  <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                    {[
+                      { label: '本年度營業額', value: formatCurrency(revenueNum), color: '#1d4ed8' },
+                      { label: '其他收支',     value: formatCurrency(otherIncomeNum), color: '#0f766e' },
+                      { label: '查帳稅前盈餘', value: formatCurrency(auditedProfitNum), color: '#4338ca' },
+                    ].map(({ label, value, color }) => (
+                      <div
+                        key={label}
+                        style={{
+                          borderLeft: `4px solid ${color}`,
+                          paddingLeft: 12,
+                        }}
+                      >
+                        <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 2 }}>{label}</div>
+                        <div style={{ fontSize: 18, fontWeight: 900, color }}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -621,13 +715,23 @@ export default function App() {
                       { val: 'income', label: 'B. 所得額標準',   color: 'emerald', result: resultB },
                       { val: 'net',    label: 'C. 同業利潤標準', color: 'purple',  result: resultC },
                     ].map(({ val, label, color, result: r }) => (
-                      <label key={val} className={`cursor-pointer px-4 py-2 rounded-xl border flex items-center transition-all
-                        ${compareMethod === val
-                          ? `border-${color}-500 bg-${color}-500/20`
-                          : 'border-slate-600 bg-slate-800 hover:bg-slate-700'}
-                        ${!r ? 'opacity-40 cursor-not-allowed' : ''}`}>
-                        <input type="radio" className="hidden" name="compare" value={val}
-                          disabled={!r} checked={compareMethod === val} onChange={() => setCompareMethod(val)} />
+                      <label
+                        key={val}
+                        className={`cursor-pointer px-4 py-2 rounded-xl border flex items-center transition-all
+                          ${compareMethod === val
+                            ? `border-${color}-500 bg-${color}-500/20`
+                            : 'border-slate-600 bg-slate-800 hover:bg-slate-700'}
+                          ${!r ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      >
+                        <input
+                          type="radio"
+                          className="hidden"
+                          name="compare"
+                          value={val}
+                          disabled={!r}
+                          checked={compareMethod === val}
+                          onChange={() => setCompareMethod(val)}
+                        />
                         <div className={`w-4 h-4 rounded-full border mr-2 flex items-center justify-center
                           ${compareMethod === val ? `border-${color}-400` : 'border-slate-500'}`}>
                           {compareMethod === val && <div className={`w-2 h-2 rounded-full bg-${color}-400`} />}
@@ -643,23 +747,28 @@ export default function App() {
                     {/* 對比雙框 */}
                     <div className="flex items-center justify-center gap-4 max-w-4xl mx-auto">
                       <CompareBox
-                        label="方案一" title="查帳申報" subtitle="(實際收集合規憑證)"
+                        label="方案一"
+                        title="查帳申報"
+                        subtitle="(實際收集合規憑證)"
                         value={resultAudited.finalValue}
                         highlighted={compareData.isAuditedBetter}
                         highlightClass="border-indigo-400 bg-indigo-500/20"
                         subtitleClass="text-indigo-300"
-                        businessType={businessType} fmt={formatCurrency}
+                        businessType={businessType}
+                        fmt={formatCurrency}
                       />
                       <div className="flex-shrink-0 bg-slate-700 w-9 h-9 rounded-full flex items-center justify-center">
                         <span className="text-slate-300 font-bold text-xs">VS</span>
                       </div>
                       <CompareBox
-                        label="方案二" title={`使用【${compareData.standardName}】`}
+                        label="方案二"
+                        title={`使用【${compareData.standardName}】`}
                         value={compareData.standardResult.finalValue}
                         highlighted={!compareData.isAuditedBetter && compareData.diff !== 0}
                         highlightClass="border-amber-400 bg-amber-500/20"
                         subtitleClass="text-amber-300"
-                        businessType={businessType} fmt={formatCurrency}
+                        businessType={businessType}
+                        fmt={formatCurrency}
                       />
                     </div>
 
@@ -803,8 +912,8 @@ function ResultCard({
   result, finalBg, finalText, labelText,
   businessType, fmt,
 }) {
-  const income = result ? result.taxableIncome : taxableIncome;
-  const value  = result ? result.finalValue    : finalValue;
+  const income  = result ? result.taxableIncome : taxableIncome;
+  const value   = result ? result.finalValue    : finalValue;
   const hasData = result !== undefined ? !!result : true;
 
   return (
@@ -832,7 +941,11 @@ function ResultCard({
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
               <p className="text-xs font-semibold text-slate-500 mb-1 flex items-center flex-wrap gap-2">
                 <span>{incomeLabel || '核定所得額'}</span>
-                {incomeBadge && <span className={`px-2.5 py-1 rounded-md text-sm font-extrabold ${incomeBadgeClass}`}>{incomeBadge}</span>}
+                {incomeBadge && (
+                  <span className={`px-2.5 py-1 rounded-md text-sm font-extrabold ${incomeBadgeClass}`}>
+                    {incomeBadge}
+                  </span>
+                )}
               </p>
               <p className="text-base font-bold text-slate-700">{fmt(income)}</p>
             </div>
@@ -861,10 +974,16 @@ function CompareBox({ label, title, subtitle, value, highlighted, highlightClass
       <p className="text-slate-400 text-[10px] md:text-xs font-bold mb-1">{label}</p>
       <h4 className="text-sm md:text-lg font-bold text-white">
         {title}
-        {subtitle && <span className={`block text-[10px] md:text-sm font-medium mt-1 ${subtitleClass}`}>{subtitle}</span>}
+        {subtitle && (
+          <span className={`block text-[10px] md:text-sm font-medium mt-1 ${subtitleClass}`}>
+            {subtitle}
+          </span>
+        )}
       </h4>
       <div className="mt-4">
-        <p className="text-xs text-slate-400 mb-1">{businessType === 'company' ? '營所稅稅額' : '個人營利所得'}</p>
+        <p className="text-xs text-slate-400 mb-1">
+          {businessType === 'company' ? '營所稅稅額' : '個人營利所得'}
+        </p>
         <p className="text-xl md:text-3xl font-black text-white">{fmt(value)}</p>
       </div>
     </div>
