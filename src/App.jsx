@@ -486,10 +486,33 @@ export default function App() {
 
             {/* 截圖專用 Header */}
             <div className="hidden bg-white p-5 rounded-2xl mb-4 border border-slate-200" id="report-header">
-              <div className="flex items-center gap-3 mb-4">
-                <LogoBadge size="sm" />
-                <p className="text-xs font-bold text-slate-500 tracking-widest">稅務決策試算報告</p>
-              </div>
+            <div className="flex items-center gap-4 mb-5">
+  <div className="flex items-center gap-3 bg-slate-50 py-2 px-4 rounded-2xl border border-slate-200">
+    <div className="bg-blue-800 p-2 rounded-xl shadow-sm flex items-center justify-center">
+      <Building2 className="w-5 h-5 text-white" />
+    </div>
+
+    <div className="flex flex-col leading-tight">
+      <span className="text-lg font-black text-blue-900 tracking-widest">
+        源信
+      </span>
+
+      <span className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">
+        記帳士事務所
+      </span>
+    </div>
+  </div>
+
+  <div>
+    <p className="text-xs font-bold text-slate-500 tracking-widest">
+      稅務決策試算報告
+    </p>
+
+    <p className="text-xs text-slate-400 mt-1">
+      北投在地事務所 AI 試算工具
+    </p>
+  </div>
+</div>
               <div className="pb-3 border-b border-slate-100 flex flex-wrap gap-6">
                 <div>
                   <h2 className="text-xl font-bold text-slate-800">行業：{selectedIndustry.name} ({selectedIndustry.code})</h2>
